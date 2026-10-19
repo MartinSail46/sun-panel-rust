@@ -1,0 +1,870 @@
+{
+  "schemaVersion": 1,
+  "project": "Sun-Panel Rust",
+  "reviewedOn": "2026-10-19",
+  "pathBase": "repository-root",
+  "purpose": "当前维护版功能盘点，供按稳定编号选择保留或删除；已删除编号保留记录，不复用。",
+  "scope": "以当前生产前端、Rust 路由、CLI 与部署配置为准；区分可见功能、默认关闭能力和命令行维护。",
+  "alreadyRemoved": [
+    "登录、注册、密码、账号管理、退出登录及旧登录/注册地址跳转。",
+    "导航内外网双地址及网络切换；当前每项仅一个 url。",
+    "旧 Go 后端、重复部署入口、旧迁移助手、旧导航 JSON/MD5 兼容、无入口公告/声明/验证码及兼容账户 API。",
+    "默认来源页脚；当前默认 footerHtml 为空，用户自定义页脚仍可编辑和保存。",
+    "应用和监控的手动进入排序、保存与取消流程，以及旧应用 itemIcon/saveSort API；分组管理排序保留。"
+  ],
+  "notImplemented": [
+    "跨设备导航实时同步或后台版本轮询。当前页面内操作会刷新共享导航状态。",
+    "网页直接执行完整实例备份或恢复。页面只展示和复制离线命令。",
+    "图片 Logo 编辑与首页显示。当前只提供 logoText 文字标题。",
+    "完整离线应用/API 数据工作流。PWA 构建支持不等于离线数据编辑。"
+  ],
+  "features": [
+    {
+      "id": "F01",
+      "category": "日常网页",
+      "name": "单地址应用导航",
+      "capabilities": [
+        "按分组展示导航",
+        "应用名称、单一 URL、描述",
+        "新增、编辑、删除应用",
+        "切换所属分组",
+        "操作成功刷新首页共享导航状态",
+        "空数据、加载、失败和重试提示"
+      ],
+      "status": "生产可用；免登录固定本地工作区。",
+      "dependencies": [
+        "F02",
+        "M06",
+        "当前导航 CRUD 与聚合查询 API"
+      ],
+      "removalNotes": [
+        "属于面板核心。可精简描述等字段；修改导航数据结构需同步前端、API、持久化与导入导出。"
+      ],
+      "sourcePaths": [
+        "src/views/home/index.vue",
+        "src/views/home/components/EditItem/index.vue",
+        "src/store/modules/navigation/index.ts",
+        "service-rust/src/navigation.rs"
+      ]
+    },
+    {
+      "id": "F02",
+      "category": "日常网页",
+      "name": "分组管理",
+      "capabilities": [
+        "新增、改名、删除分组",
+        "独立编辑草稿，取消不改原数据，失败保留输入",
+        "删除分组及所属导航前确认",
+        "修改后同步当前首页",
+        "分组顺序支持拖动、上下移动及保存或取消",
+        "分组图标、描述可由 API 和导入导出保留"
+      ],
+      "status": "生产可用；当前编辑窗口只提供分组名称，没有分组图标和描述编辑器。",
+      "dependencies": [
+        "F01",
+        "F03"
+      ],
+      "removalNotes": [
+        "若取消分组，需要先设计无分组导航与既有数据迁移；可独立移除分组图标、描述字段。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/ItemGroupManage/index.vue",
+        "src/store/modules/navigation/index.ts",
+        "service-rust/src/navigation.rs"
+      ]
+    },
+    {
+      "id": "F03",
+      "category": "日常网页",
+      "name": "编辑模式与直接拖动",
+      "capabilities": [
+        "浏览与编辑模式切换，入口位于右上角",
+        "编辑模式下应用和监控共用更多操作按钮，保留右键菜单",
+        "编辑模式点击卡片编辑",
+        "应用可直接拖到当前分组、其他分组或空分组的任意位置",
+        "松手后自动保存应用位置和所属分组，无需进入排序或另点保存",
+        "导航快照版本检查与源、目标分组原子写入，过期时载入最新排列",
+        "移动结果不确定时只读核对，暂停继续拖动并显示核对入口",
+        "搜索期间暂停应用拖动，清空搜索后恢复",
+        "监控卡片在监控区域内直接拖动，松手自动保存",
+        "右上角状态标记与按需展开的编辑帮助，不增加正文提示行高度",
+        "分组管理仍支持拖动、上下移动及保存或取消分组顺序"
+      ],
+      "status": "生产可用；应用拖动仅在编辑模式且无搜索、保存或待核对状态时启用；监控仅在自身区域内排序。",
+      "dependencies": [
+        "F01",
+        "F02",
+        "F17（监控拖动部分）",
+        "导航快照与原子 move API",
+        "M08（不确定结果核对）"
+      ],
+      "removalNotes": [
+        "应用拖动、监控拖动和分组管理排序可分别裁剪；若删除编辑模式，需为增删改保留明确入口。导航移动的版本检查和事务保护应一起维护。"
+      ],
+      "sourcePaths": [
+        "src/views/home/index.vue",
+        "src/components/common/CardActionsButton.vue",
+        "src/store/modules/navigation/index.ts",
+        "src/utils/navigationMove.ts",
+        "src/api/panel/navigation.ts",
+        "src/components/apps/ItemGroupManage/index.vue",
+        "src/components/deskModule/SystemMonitor/index.vue",
+        "service-rust/src/navigation.rs"
+      ]
+    },
+    {
+      "id": "F04",
+      "category": "日常网页",
+      "name": "导航打开方式与地址操作",
+      "capabilities": [
+        "当前页面打开",
+        "新标签打开",
+        "小窗口 iframe 打开",
+        "保留浏览器真实链接和组合键行为",
+        "复制应用地址",
+        "小窗口显示地址、复制地址和常驻新标签入口",
+        "小窗口等待和超时提示"
+      ],
+      "status": "生产可用；跨域 iframe 的 load 事件不保证目标页面成功显示，目标可能拒绝嵌入。",
+      "dependencies": [
+        "F01"
+      ],
+      "removalNotes": [
+        "三种打开方式可分别裁剪。移除一种方式需迁移已有 openMethod；复制地址也可独立移除。"
+      ],
+      "sourcePaths": [
+        "src/views/home/index.vue",
+        "src/views/home/components/EditItem/index.vue"
+      ]
+    },
+    {
+      "id": "F05",
+      "category": "日常网页",
+      "name": "文字图标",
+      "capabilities": [
+        "自定义文字",
+        "自定义图标背景色",
+        "透明色和预设色",
+        "重置背景色"
+      ],
+      "status": "生产可用；不依赖外部图标服务。",
+      "dependencies": [
+        "F01",
+        "图标通用渲染组件"
+      ],
+      "removalNotes": [
+        "可独立删除一种图标类型；需要为已有 itemType=1 提供替代或迁移。"
+      ],
+      "sourcePaths": [
+        "src/views/home/components/EditItem/IconEditor.vue",
+        "src/components/common/ItemIcon/index.vue"
+      ]
+    },
+    {
+      "id": "F06",
+      "category": "日常网页",
+      "name": "图片图标",
+      "capabilities": [
+        "输入图片 URL",
+        "上传本地图片",
+        "图标背景色",
+        "懒加载和异步解码",
+        "保留导入的图片引用"
+      ],
+      "status": "生产可用；远程图片仍由浏览器请求其来源，本地上传图片由本实例提供。",
+      "dependencies": [
+        "F01",
+        "M06 的图片存储和静态提供",
+        "图片上传 API",
+        "文件引用保护"
+      ],
+      "removalNotes": [
+        "可只删除远程图片地址输入，保留本地上传；删除文件管理页面不必同时删除图片存储。"
+      ],
+      "sourcePaths": [
+        "src/views/home/components/EditItem/IconEditor.vue",
+        "src/components/common/ItemIcon/index.vue",
+        "service-rust/src/system.rs"
+      ]
+    },
+    {
+      "id": "F07",
+      "category": "日常网页",
+      "name": "在线 Iconify 图标",
+      "capabilities": [
+        "输入 Iconify 图标名称",
+        "跳转在线图标库",
+        "配置图标背景色"
+      ],
+      "status": "生产可选；可能访问公网，区别于本地内置的界面 SVG 图标。",
+      "dependencies": [
+        "F01",
+        "@iconify/vue",
+        "src/components/common/SvgIconOnline/index.vue"
+      ],
+      "removalNotes": [
+        "适合纯内网环境优先裁剪；需替换已有 itemType=3 图标，不能把内置 SvgIcon 一起删除。"
+      ],
+      "sourcePaths": [
+        "src/views/home/components/EditItem/IconEditor.vue",
+        "src/components/common/SvgIconOnline/index.vue",
+        "src/components/common/ItemIcon/index.vue"
+      ]
+    },
+    {
+      "id": "F08",
+      "category": "日常网页",
+      "name": "自动获取网站图标",
+      "capabilities": [
+        "由应用 URL 获取 favicon",
+        "解析页面图标链接和默认 favicon.ico",
+        "抓取结果保存为本地图片",
+        "DNS、IP、重定向、响应大小、时间和并发限制"
+      ],
+      "status": "生产可用；私有地址抓取由 SUN_PANEL_ALLOW_PRIVATE_FAVICON 显式开启，回环、链路本地和 Fake-IP 等仍受限制；当前开发机公网 DNS 曾返回 Fake-IP，不能据此宣称所有公网抓取均已验证。",
+      "dependencies": [
+        "F06",
+        "图片上传存储",
+        "Rust HTTP 客户端和 HTML 图标解析"
+      ],
+      "removalNotes": [
+        "可独立删除按钮、抓取 API 和专用解析依赖；手动上传图片图标仍可保留。"
+      ],
+      "sourcePaths": [
+        "src/views/home/components/EditItem/index.vue",
+        "service-rust/src/system.rs",
+        "service-rust/src/config.rs"
+      ]
+    },
+    {
+      "id": "F09",
+      "category": "日常网页",
+      "name": "搜索应用",
+      "capabilities": [
+        "按名称、地址和描述过滤",
+        "Enter 打开选中应用",
+        "方向键切换选中项",
+        "Escape 和清空按钮清空",
+        "搜索栏显示开关"
+      ],
+      "status": "生产可用；风格配置控制搜索栏是否显示。",
+      "dependencies": [
+        "F01",
+        "搜索栏组件",
+        "F04 的打开规则"
+      ],
+      "removalNotes": [
+        "可与网页搜索分别删除；删除描述字段需同步调整过滤逻辑。"
+      ],
+      "sourcePaths": [
+        "src/components/deskModule/SearchBox/index.vue",
+        "src/store/modules/navigation/helpers.ts",
+        "src/views/home/index.vue",
+        "src/components/apps/Style/index.vue"
+      ]
+    },
+    {
+      "id": "F10",
+      "category": "日常网页",
+      "name": "搜索网页",
+      "capabilities": [
+        "独立网页搜索模式",
+        "Google、百度、Bing 选择",
+        "保存当前三种引擎中的所选项",
+        "搜索结果新标签打开"
+      ],
+      "status": "生产可选；依赖选定搜索服务；只提供当前三种引擎，没有自定义搜索引擎入口或旧配置回退。",
+      "dependencies": [
+        "搜索栏组件",
+        "模块配置存储"
+      ],
+      "removalNotes": [
+        "纯内网环境可独立删除并保留 F09 应用搜索。"
+      ],
+      "sourcePaths": [
+        "src/components/deskModule/SearchBox/index.vue",
+        "src/store/modules/navigation/helpers.ts",
+        "src/store/modules/moduleConfig/index.ts"
+      ]
+    },
+    {
+      "id": "F11",
+      "category": "日常网页",
+      "name": "时钟与日期",
+      "capabilities": [
+        "时间、月日、星期",
+        "秒显示开关",
+        "隐藏秒时按分钟边界刷新",
+        "页面后台暂停、恢复时更新"
+      ],
+      "status": "生产可用；顶部始终渲染时钟，当前没有隐藏整个时钟的开关。",
+      "dependencies": [
+        "国际化日期文本",
+        "前台定时调度器"
+      ],
+      "removalNotes": [
+        "可整体删除或只去掉秒选项；统一调度器也被监控使用，不能直接整体删除。"
+      ],
+      "sourcePaths": [
+        "src/components/deskModule/Clock/index.vue",
+        "src/components/apps/Style/index.vue",
+        "src/views/home/index.vue",
+        "src/utils/foregroundScheduler.ts"
+      ]
+    },
+    {
+      "id": "F12",
+      "category": "日常网页",
+      "name": "面板文字标题",
+      "capabilities": [
+        "顶部自定义文字，最多 20 字",
+        "同步浏览器页面标题"
+      ],
+      "status": "生产可用；仅提供文字标题。",
+      "dependencies": [
+        "M01"
+      ],
+      "removalNotes": [
+        "可固定为统一名称并删除编辑项。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/Style/index.vue",
+        "src/views/home/index.vue",
+        "src/store/modules/panel/helper.ts"
+      ]
+    },
+    {
+      "id": "F13",
+      "category": "日常网页",
+      "name": "壁纸",
+      "capabilities": [
+        "上传或拖放本地图片",
+        "手填图片地址",
+        "背景模糊",
+        "背景遮罩",
+        "文件管理中设为壁纸",
+        "默认内置壁纸",
+        "固定路径的默认壁纸",
+        "一键使用默认壁纸",
+        "空值及加载失败时回退默认图片"
+      ],
+      "status": "生产可用；外链壁纸由浏览器访问来源。",
+      "dependencies": [
+        "M01",
+        "本地上传部分依赖图片存储与引用保护",
+        "F19 仅作为额外设置入口"
+      ],
+      "removalNotes": [
+        "可只保留固定本地背景并删除上传、外链和特效；本地图片底层可能仍被图标使用。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/Style/index.vue",
+        "src/components/apps/UploadFileManager/index.vue",
+        "src/views/home/index.vue",
+        "src/store/modules/panel/helper.ts"
+      ]
+    },
+    {
+      "id": "F14",
+      "category": "日常网页",
+      "name": "卡片风格",
+      "capabilities": [
+        "详情卡片和小图标两种风格",
+        "详情风格隐藏描述",
+        "小图标风格隐藏标题",
+        "统一文字颜色",
+        "监控跟随卡片风格"
+      ],
+      "status": "生产可用。",
+      "dependencies": [
+        "F01",
+        "M01",
+        "F17 使用同一风格配置"
+      ],
+      "removalNotes": [
+        "可以只保留一种风格；需同时调整导航和监控渲染，处理已保存的 iconStyle 配置。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/Style/index.vue",
+        "src/views/home/index.vue",
+        "src/views/home/components/AppIcon/index.vue",
+        "src/components/deskModule/SystemMonitor/index.vue"
+      ]
+    },
+    {
+      "id": "F15",
+      "category": "日常网页",
+      "name": "页面布局与自适应",
+      "capabilities": [
+        "内容最大宽度，px 或百分比",
+        "左右间距",
+        "按视口高度百分比设置顶部和底部留白",
+        "手机与小屏适配",
+        "设置窗口侧栏折叠",
+        "回到顶部",
+        "内容溢出时滚动，支持稳定滚动条空间避免横向位移"
+      ],
+      "status": "生产可用。",
+      "dependencies": [
+        "M01（可配置布局部分）",
+        "系统应用窗口"
+      ],
+      "removalNotes": [
+        "可固定布局并删除滑块；响应式布局建议保留。回到顶部可独立删除。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/Style/index.vue",
+        "src/views/home/index.vue",
+        "src/views/home/components/AppStarter/index.vue"
+      ]
+    },
+    {
+      "id": "F16",
+      "category": "日常网页",
+      "name": "自定义 HTML 页脚",
+      "capabilities": [
+        "编辑 HTML 页脚",
+        "默认留空",
+        "可清空或保存用户自定义内容",
+        "页脚内本地上传图片引用参与保护"
+      ],
+      "status": "生产可用；默认不显示来源页脚，保留用户自定义编辑能力。",
+      "dependencies": [
+        "M01",
+        "文件引用保护"
+      ],
+      "removalNotes": [
+        "可独立删除编辑器与首页页脚；仓库 LICENSE 和版权归属继续保留。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/Style/index.vue",
+        "src/views/home/index.vue",
+        "src/store/modules/panel/helper.ts",
+        "service-rust/src/system.rs"
+      ]
+    },
+    {
+      "id": "F17",
+      "category": "日常网页",
+      "name": "系统监控",
+      "capabilities": [
+        "CPU 使用率",
+        "内存已用、总量和比例",
+        "磁盘已用、总量和比例",
+        "磁盘挂载点列表及路径选择",
+        "卡片新增、编辑、删除",
+        "编辑模式下在监控区域内直接拖动，松手自动保存",
+        "监控卡片与应用共用更多操作按钮，不拖入应用分组",
+        "进度色、轨道色、文字色、背景色与重置",
+        "整体显示和监控标题开关",
+        "加载、失败、过期和最近成功时间",
+        "旧值保留时标识失效状态",
+        "运行环境与容器配额口径说明",
+        "共享聚合轮询、后台暂停、恢复刷新、不重叠请求和失败退避",
+        "轻量 SVG 圆弧与原生线性进度，保留无数据状态"
+      ],
+      "status": "生产可选，风格中控制显示；监控表示服务运行环境，不能默认等同于完整宿主 NAS；至少一张监控卡片的限制仍存在。",
+      "dependencies": [
+        "F14",
+        "模块配置存储",
+        "Rust sysinfo 与监控 API",
+        "前台调度器",
+        "M08"
+      ],
+      "removalNotes": [
+        "CPU、内存、磁盘和配色编辑可分别裁剪；全删监控时可继续收缩 sysinfo 依赖和定时器，但时钟仍使用前台调度器。"
+      ],
+      "sourcePaths": [
+        "src/components/deskModule/SystemMonitor/index.vue",
+        "src/components/deskModule/SystemMonitor/Edit/index.vue",
+        "src/components/deskModule/SystemMonitor/Edit/DiskEditor/index.vue",
+        "src/components/deskModule/SystemMonitor/Edit/GenericProgressStyleEditor/index.vue",
+        "src/api/system/systemMonitor.ts",
+        "service-rust/src/system.rs"
+      ]
+    },
+    {
+      "id": "F18",
+      "category": "日常网页",
+      "name": "主题偏好",
+      "capabilities": [
+        "中文界面",
+        "亮色、暗色、跟随系统",
+        "当前浏览器本地保存"
+      ],
+      "status": "生产可用；主题是当前浏览器本地偏好，没有语言切换入口。",
+      "dependencies": [
+        "shadcn-vue / Reka UI 控件",
+        "本地存储",
+        "主题 hook"
+      ],
+      "removalNotes": [
+        "可独立固定一种主题；中文文案随业务组件维护。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/Preferences/index.vue",
+        "src/store/modules/app/helper.ts",
+        "src/store/modules/app/index.ts",
+        "src/hooks/useTheme.ts"
+      ]
+    },
+    {
+      "id": "F19",
+      "category": "日常网页",
+      "name": "图片文件管理",
+      "capabilities": [
+        "图片列表和手动刷新",
+        "图片预览",
+        "复制链接",
+        "文件名称、路径和创建时间等详情",
+        "设为壁纸",
+        "删除确认",
+        "用途和引用数量",
+        "被壁纸、导航、分组或页脚引用时禁止删除",
+        "删除后拒绝重新写回已删图片引用"
+      ],
+      "status": "生产可用；此页面没有独立上传按钮，上传入口位于图标和壁纸编辑器。",
+      "dependencies": [
+        "图片存储与上传 API",
+        "F13（设为壁纸）",
+        "M01"
+      ],
+      "removalNotes": [
+        "页面可独立移除；如图标或壁纸仍使用本地图片，应保留底层文件 API、存储和引用保护。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/UploadFileManager/index.vue",
+        "service-rust/src/system.rs",
+        "service-rust/src/navigation.rs"
+      ]
+    },
+    {
+      "id": "F20",
+      "category": "日常网页",
+      "name": "导航 JSON 导入导出",
+      "capabilities": [
+        "导出当前 Sun-Panel-Navigation/schemaVersion=1 导航 JSON",
+        "只导入当前 Sun-Panel-Navigation/schemaVersion=1 格式",
+        "文件大小和格式检查",
+        "预览分组、应用、新增、更新、重复、删除和歧义",
+        "默认合并并去重",
+        "追加保留重复项",
+        "替换全部需输入确认短语",
+        "预览 revision 拒绝过期导入",
+        "保留当前格式中的分组图标、描述、排序零值和空导航",
+        "导入成功刷新首页；刷新失败提示不要重复导入"
+      ],
+      "status": "生产可用；只交换导航与图标引用，不含图片实体、外观和小组件；完整备份另见 M02。",
+      "dependencies": [
+        "F01",
+        "F02",
+        "Rust 导航导入事务",
+        "M08"
+      ],
+      "removalNotes": [
+        "导入、导出、合并、追加、替换可分别删除；建议保留至少一种可迁出的数据格式。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/ImportExport/index.vue",
+        "src/api/panel/navigation.ts",
+        "service-rust/src/navigation.rs"
+      ]
+    },
+    {
+      "id": "F21",
+      "category": "日常网页",
+      "name": "关于与来源信息",
+      "capabilities": [
+        "当前维护版标识",
+        "Rust 后端版本",
+        "前端版本和构建时间",
+        "公开源码基线",
+        "原作者和原项目源码链接",
+        "许可归属说明",
+        "版本加载失败重试"
+      ],
+      "status": "生产可用；未配置当前维护分支发布地址，不提供有效的一键检查更新；原项目链接明确只是来源。",
+      "dependencies": [
+        "/api/about",
+        "构建版本元数据"
+      ],
+      "removalNotes": [
+        "可删页面或外链，仓库 LICENSE 与来源归属仍保留。"
+      ],
+      "sourcePaths": [
+        "src/components/apps/About/index.vue",
+        "service-rust/src/system.rs",
+        "vite.config.mts",
+        "LICENSE"
+      ]
+    },
+    {
+      "id": "M01",
+      "category": "可靠性基础设施",
+      "name": "配置保存与冲突处理",
+      "capabilities": [
+        "风格、壁纸统一中央保存",
+        "700 毫秒防抖和串行队列",
+        "仅保留最新待保存快照",
+        "关闭设置窗口 flush",
+        "保存中、成功、失败和重试状态",
+        "重置风格并保存",
+        "revision 乐观并发检查",
+        "不同字段冲突合并",
+        "同字段冲突保留草稿、显式载入服务端版本",
+        "同浏览器标签版本通知并刷新无草稿页面",
+        "模块按名称串行保存和版本检查"
+      ],
+      "status": "生产生效；配置标签通知不能当作导航跨设备实时同步。",
+      "dependencies": [
+        "配置 API",
+        "M08",
+        "本地草稿和存储"
+      ],
+      "removalNotes": [
+        "建议保留基础保存、冲突和失败处理；可以精简提示样式，不建议恢复无版本覆盖写。"
+      ],
+      "sourcePaths": [
+        "src/store/modules/panel/index.ts",
+        "src/store/modules/moduleConfig/index.ts",
+        "src/utils/settingsSave.ts",
+        "src/utils/panelSync.ts",
+        "src/utils/confirmedWrite.ts",
+        "service-rust/src/navigation.rs"
+      ]
+    },
+    {
+      "id": "M02",
+      "category": "离线 CLI",
+      "name": "完整实例备份恢复",
+      "capabilities": [
+        "backup 和 restore 命令",
+        "一致 SQLite 快照，保留已提交 WAL 数据",
+        "上传文件与空目录",
+        "版本、时间、文件大小和 SHA256 清单",
+        "校验完整文件集和 SQLite 完整性",
+        "目标必须新建或为空，拒绝覆盖",
+        "暂存发布和普通错误回滚",
+        "共享实例锁，拒绝在线维护",
+        "拒绝上传和备份树符号链接",
+        "网页仅展示和复制原生及 Docker 命令"
+      ],
+      "status": "仅离线 CLI 实际执行，需停服务；分离自定义路径不承诺跨目录掉电原子恢复；环境变量、代理配置和程序镜像由部署文件管理。",
+      "dependencies": [
+        "M06 的实例锁、数据库和图片目录",
+        "service-rust/src/backup.rs"
+      ],
+      "removalNotes": [
+        "建议保留；页面上的维护说明可以独立隐藏，CLI 不必一起删除。"
+      ],
+      "sourcePaths": [
+        "service-rust/src/main.rs",
+        "service-rust/src/backup.rs",
+        "service-rust/src/instance_lock.rs",
+        "src/components/apps/ImportExport/index.vue",
+        "service-rust/README.md"
+      ]
+    },
+    {
+      "id": "M04",
+      "category": "文件级扩展",
+      "name": "自定义 CSS 和 JavaScript",
+      "capabilities": [
+        "首页加载 /custom/index.css",
+        "首页加载 /custom/index.js",
+        "修改静态文件后随前端发布",
+        "custom 文件每次重新验证缓存"
+      ],
+      "status": "加载钩子实际存在，当前两个文件仅占位注释；没有网页编辑器。",
+      "dependencies": [
+        "index.html",
+        "静态文件部署"
+      ],
+      "removalNotes": [
+        "可以独立删除两个文件引用和占位文件，不影响常规风格配置。"
+      ],
+      "sourcePaths": [
+        "index.html",
+        "public/custom/index.css",
+        "public/custom/index.js",
+        "service-rust/src/lib.rs"
+      ]
+    },
+    {
+      "id": "M05",
+      "category": "默认关闭",
+      "name": "PWA 构建支持",
+      "capabilities": [
+        "VITE_GLOB_APP_PWA=true 构建开关",
+        "Web App manifest",
+        "应用名称和图标",
+        "生成并自动注册 service worker"
+      ],
+      "status": "默认关闭；只是可选构建能力，不宣称完整导航 API 和数据离线工作流。",
+      "dependencies": [
+        "vite-plugin-pwa",
+        "Vite 构建",
+        "public 图标"
+      ],
+      "removalNotes": [
+        "不用安装式页面可删除插件和配置；已有部署曾启用时需处理旧 service worker 的卸载和缓存。"
+      ],
+      "sourcePaths": [
+        "vite.config.mts",
+        ".env",
+        "package.json"
+      ]
+    },
+    {
+      "id": "M06",
+      "category": "运行与部署",
+      "name": "Rust 单进程和容器运行",
+      "capabilities": [
+        "原生 serve 和默认启动",
+        "Docker 与默认 Compose",
+        "SQLite WAL 持久化",
+        "静态资源和上传文件同源提供",
+        "健康 API 与 --healthcheck",
+        "实例 OS 文件锁",
+        "HTTP 优雅停机",
+        "非 root、只读根文件系统和数据卷",
+        "构建时 Brotli/Gzip 与运行时协商",
+        "ETag、Last-Modified 和哈希资源长期缓存",
+        "端口、数据/数据库/上传/前端目录、上传限制、监控周期、线程和 DB 连接可配置",
+        "请求并发和体积限制",
+        "固定本地工作区归属，无账户 API",
+        "未知网页路径展示基础 404 页面"
+      ],
+      "status": "默认部署入口使用 Rust；健康检查和文件锁属于基础能力；停机后独立图片处理任务完全收尾及强杀文件恢复不作为已实现能力。",
+      "dependencies": [
+        "Rust Axum/Tokio/SQLx",
+        "SQLite",
+        "构建后的 Vue / shadcn-vue 前端 dist",
+        "Docker 为可选部署方式"
+      ],
+      "removalNotes": [
+        "可只保留一种部署方式；建议保留健康检查、数据持久化、锁、静态缓存和基础请求限制。"
+      ],
+      "sourcePaths": [
+        "service-rust/src/main.rs",
+        "service-rust/src/lib.rs",
+        "service-rust/src/config.rs",
+        "service-rust/src/instance_lock.rs",
+        "service-rust/src/db.rs",
+        "build/precompress.mts",
+        "Dockerfile",
+        "docker-compose.yml",
+        "service-rust/src/workspace.rs",
+        "src/router/index.ts",
+        "src/views/exception/404/index.vue"
+      ]
+    },
+    {
+      "id": "M07",
+      "category": "开发和交付",
+      "name": "回归、CI、发布与性能测量",
+      "capabilities": [
+        "Rust 单元与集成回归",
+        "前端逻辑和组件回归",
+        "ESLint、TypeScript 检查和生产构建",
+        "独立临时容器回归",
+        "原生 amd64/arm64 容器 CI 配置",
+        "标签版本校验与 GitHub Release 发布",
+        "配置镜像仓库及凭据后发布多架构镜像",
+        "导航请求只读基准脚本"
+      ],
+      "status": "开发维护能力，不是产品页面功能；CI 配置不等于远端本轮运行已成功，基准脚本不比较其他后端，不承诺跨语言性能提升。",
+      "dependencies": [
+        "开发工具链",
+        "测试夹具",
+        "GitHub Actions（远端 CI）",
+        "Docker（容器回归）"
+      ],
+      "removalNotes": [
+        "建议保留关键回归与版本一致性校验。旧 docker-build 发布入口及历史阶段性基准 JSON 已删除，发布统一到 publish-rust。"
+      ],
+      "sourcePaths": [
+        "service-rust/tests",
+        "tests",
+        "scripts",
+        "service-rust/scripts/benchmark.py",
+        ".github/workflows/rust-backend.yml",
+        ".github/workflows/publish-rust.yml",
+        "package.json",
+        "CHANGELOG.md",
+        "doc/releases/1.0.0.md"
+      ]
+    },
+    {
+      "id": "M08",
+      "category": "可靠性基础设施",
+      "name": "请求超时与取消",
+      "capabilities": [
+        "读请求默认 10 秒",
+        "普通写请求默认 15 秒",
+        "导入与上传默认 35 秒",
+        "导入预览作为读操作使用 35 秒",
+        "整体墙钟截止时间覆盖连接等待",
+        "AbortSignal 取消与超时中断",
+        "取消、超时、网络错误分类",
+        "取消请求不弹全局错误",
+        "成功或失败均释放请求状态和计时器",
+        "写入中断标记结果不确定",
+        "写结果不确定时通过只读核对实际结果，不自动重放写请求",
+        "可通过请求参数覆盖超时",
+        "应用移动待核对时禁止继续拖动，核对后按服务端实际排列恢复"
+      ],
+      "status": "生产生效，覆盖统一 API 请求及上传入口；客户端取消不能保证服务端已经回滚，不确定写入先只读核对，不自动重放。",
+      "dependencies": [
+        "src/utils/requestLifetime.ts",
+        "统一 Axios 封装",
+        "上传生命周期封装",
+        "配置与导入等调用方的只读核对"
+      ],
+      "removalNotes": [
+        "建议保留。可调超时值或提示，不建议删除写结果不确定的保护和请求生命周期清理。"
+      ],
+      "sourcePaths": [
+        "src/utils/requestLifetime.ts",
+        "src/utils/request/index.ts",
+        "src/utils/request/axios.ts",
+        "src/utils/confirmedWrite.ts",
+        "src/utils/navigationMove.ts",
+        "src/hooks/useImageUpload.ts",
+        "src/hooks/useSystemMonitor.ts",
+        "src/store/modules/navigation/index.ts",
+        "src/components/apps/ImportExport/index.vue",
+        "src/views/home/components/EditItem/index.vue",
+        "src/api/panel/navigation.ts",
+        "src/api/system/systemMonitor.ts"
+      ]
+    }
+  ],
+  "removed": [
+    {
+      "id": "M03",
+      "name": "旧库兼容与安全迁移助手",
+      "reason": "删除旧 Go/SQLite 迁移助手、migrate-legacy 命令和 Compose migrate 工具服务；保留既有数据库所需的 SQLx 迁移历史，不再提供旧实例迁移入口。"
+    },
+    {
+      "id": "L01",
+      "name": "旧 Go 后端和部署文件",
+      "reason": "删除旧 Go 源码、legacy 部署文件和相关历史参考；部署统一为根 Dockerfile 与根 docker-compose.yml。"
+    },
+    {
+      "id": "L02",
+      "name": "旧 JSON 协议及无独立页面接口",
+      "reason": "删除无当前调用方的账户元数据、通用文件上传、旧批量和分项监控等兼容 API；当前界面必需的导航、图片和监控 API 归入对应 F 功能维护。"
+    },
+    {
+      "id": "L03",
+      "name": "公告、声明、验证码和旧字段",
+      "reason": "删除无生产入口的公告、声明、验证码、旧账户状态、图片 Logo 字段和相关静态依赖。"
+    },
+    {
+      "id": "L04",
+      "name": "测试页与错误页",
+      "reason": "删除开发测试页、无入口 500 页面及旧登录/注册跳转；基础 404 和未知路由回退作为 M06 的网页基础行为保留。"
+    }
+  ]
+}

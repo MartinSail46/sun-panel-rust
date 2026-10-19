@@ -1,0 +1,10 @@
+{
+  "folders": [
+    { "name": "frontend", "path": "src" },
+    { "name": "backend", "path": "service-rust" },
+    { "name": "root", "path": "." }
+  ],
+  "extensions": {
+    "recommendations": ["Vue.volar", "dbaeumer.vscode-eslint", "rust-lang.rust-analyzer"]
+  }
+}

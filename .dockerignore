@@ -1,0 +1,25 @@
+# Only application build inputs enter the Docker context.
+**
+!Dockerfile
+!package.json
+!pnpm-lock.yaml
+!.npmrc
+!index.html
+!tsconfig.json
+!vite.config.mts
+!build/
+!build/**
+!src/
+!src/**
+!public/
+!public/**
+!service-rust/
+!service-rust/Cargo.toml
+!service-rust/Cargo.lock
+!service-rust/rust-toolchain.toml
+!service-rust/src/
+!service-rust/src/**
+!service-rust/migrations/
+!service-rust/migrations/**
+!LICENSE
+!THIRD_PARTY_NOTICES.txt

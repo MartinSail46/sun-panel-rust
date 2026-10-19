@@ -1,0 +1,33 @@
+services:
+  sun-panel-rust:
+    image: sun-panel-rust:1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${SUN_PANEL_PORT:-3002}:3002"
+    environment:
+      SUN_PANEL_BIND: "0.0.0.0:3002"
+      SUN_PANEL_DATA_DIR: "/app/data"
+      SUN_PANEL_DATABASE: "/app/data/database.db"
+      SUN_PANEL_UPLOADS: "/app/data/uploads"
+      SUN_PANEL_WEB_DIR: "/app/web"
+      SUN_PANEL_WORKER_THREADS: "${SUN_PANEL_WORKER_THREADS:-2}"
+      SUN_PANEL_DB_CONNECTIONS: "${SUN_PANEL_DB_CONNECTIONS:-2}"
+      SUN_PANEL_MONITOR_INTERVAL: "${SUN_PANEL_MONITOR_INTERVAL:-5}"
+      SUN_PANEL_ALLOW_PRIVATE_FAVICON: "${SUN_PANEL_ALLOW_PRIVATE_FAVICON:-false}"
+      RUST_LOG: "${RUST_LOG:-sun_panel_rust=info,tower_http=warn}"
+    volumes:
+      - sun-panel-rust-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  sun-panel-rust-data:

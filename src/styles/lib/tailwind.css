@@ -1,0 +1,134 @@
+@import "tailwindcss" source(none);
+@import "tw-animate-css";
+
+/* Keep source detection inside the frontend, away from the Rust build tree. */
+@source "../../";
+@source "../../../index.html";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Preserve the existing panel palette while adopting Tailwind 4. */
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-800: #1e293b;
+  --color-gray-200: #e5e7eb;
+  --color-gray-400: #9ca3af;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-800: #27272a;
+  --color-zinc-900: #18181b;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-800: #262626;
+  --color-red-600: #dc2626;
+  --color-red-900: #7f1d1d;
+
+
+}
+
+@layer base {
+  /* Tailwind 3 defaults used by the existing borders and search field. */
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #166534;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e293b;
+  --muted: #f4f4f5;
+  --muted-foreground: #52525b;
+  --accent: #edf3ef;
+  --accent-foreground: #14532d;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --border: #e4e4e7;
+  --input: #d4d4d8;
+  --ring: #16a34a;
+  --radius: 0.625rem;
+  --panel-action: #252525e6;
+  --panel-action-foreground: #ffffff;
+}
+.dark {
+  --background: #18181b;
+  --foreground: #fafafa;
+  --card: #202024;
+  --card-foreground: #fafafa;
+  --popover: #242428;
+  --popover-foreground: #fafafa;
+  --primary: #86efac;
+  --primary-foreground: #052e16;
+  --secondary: #303035;
+  --secondary-foreground: #fafafa;
+  --muted: #2b2b30;
+  --muted-foreground: #b1b1bb;
+  --accent: #303b34;
+  --accent-foreground: #bbf7d0;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #3f3f46;
+  --input: #52525b;
+  --ring: #4ade80;
+}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+@layer base {
+  body { color: var(--foreground); background: var(--background); }
+  *, ::before, ::after { border-color: var(--border); }
+  :focus-visible { outline-color: var(--ring); }
+  ::-webkit-scrollbar { width: 6px; height: 6px; background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #8887; border-radius: 6px; }
+}
+.panel-button { color: var(--panel-action-foreground); background: var(--panel-action); border: 1px solid #ffffff33; }
+.panel-button:hover { color: var(--panel-action-foreground); background: #454545; }
